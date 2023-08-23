@@ -343,11 +343,13 @@ class SandSimulation{
 		return output
 	}
 	applyFigure(){
+		let game = this.gameArea
+
 		if(this.figure.stop){
 			for(let f in this.figure.active){
 				let fo = this.figure.active[f]
 				if(fo!=null){
-					if(parseInt(splitWord(f,',')[1]) < this.gameArea.y+5){
+					if(parseInt(splitWord(f,',')[1]) < game.y+5){
 						this.isGameOver = true
 					}
 					if(fo.body == 'soft'){
@@ -445,10 +447,24 @@ class SandSimulation{
 			this.deletedColorList = []
 			this.isBoom = false
 		}
-
+		
 		this.apply = clearUndefined(this.apply)
 
 		this.doBack(doBack)
+	}
+	deleteBlocksOutCanvas(){
+		let game = this.gameArea
+		let convert = convertPositionToString
+
+		for(let yo=game.y; yo<game.y+game.h; yo++){
+			if(this.isBlockExist(convert(game.x-1,yo), this.apply)){
+				delete this.apply[convert(game.x-1,yo)]
+			}
+			if(this.isBlockExist(convert(game.x+game.w, yo), this.apply)){
+				delete this.apply[convert(game.x+game.w,yo)]
+			}
+		}
+		this.apply = clearUndefined(this.apply)
 	}
 	doBack(state){
 		if(state){
@@ -560,7 +576,7 @@ class SandSimulation{
 		let size = this.size.block
 		let game = this.gameArea
 
-		ctx.drawImage(canva.sprite, this.x+(game.x-15.25)*size, this.y+(game.y+2)*size, size*14*8.05, size*20*8)
+		ctx.drawImage(canva.sprite, this.x+(game.x-15.25)*size, this.y+(game.y+2)*size, size*14*8.1, size*20*8)
 	}
 
 	drawCurrentColor(){
@@ -593,6 +609,9 @@ class SandSimulation{
 		this.spawnFigure()
 		this.moveFigure()
 		this.applyFigure()
+		if(this.doSpawn){
+			this.deleteBlocksOutCanvas()
+		}
 		if(!this.isBoom || this.isTimerOverForBoom()){
 		this.executeFade()
 		}
